@@ -1,8 +1,23 @@
+import { useRef } from 'react';
 import { useSettingsStore } from '../../store/settingsStore';
 import { MODEL_REGISTRY } from '../../models/agent';
+import { exportToJSON, importFromJSON } from '../../services/exportImport';
 
 export function SettingsView() {
   const settings = useSettingsStore();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleImport = async (mode: 'merge' | 'replace') => {
+    const file = fileInputRef.current?.files?.[0];
+    if (!file) return;
+    try {
+      const result = await importFromJSON(file, mode);
+      alert(`Imported ${result.imported} tasks`);
+    } catch (err) {
+      alert(`Import failed: ${err instanceof Error ? err.message : err}`);
+    }
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
 
   return (
     <div className="p-6 max-w-xl mx-auto space-y-6">
@@ -16,7 +31,7 @@ export function SettingsView() {
           <label className="form-control w-full">
             <div className="label">
               <span className="label-text">OpenRouter API Key</span>
-              <span className="label-text-alt text-success">
+              <span className={`label-text-alt ${settings.openRouterApiKey ? 'text-success' : 'text-error'}`}>
                 {settings.openRouterApiKey ? 'Configured' : 'Required'}
               </span>
             </div>
@@ -139,6 +154,45 @@ export function SettingsView() {
           >
             Reset Spending Counter
           </button>
+        </div>
+      </div>
+
+      {/* Data Management */}
+      <div className="card bg-base-200">
+        <div className="card-body">
+          <h3 className="card-title text-sm">Data Management</h3>
+
+          <div className="flex gap-2">
+            <button className="btn btn-sm btn-outline" onClick={exportToJSON}>
+              Export Backup (JSON)
+            </button>
+          </div>
+
+          <div className="divider my-1" />
+
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".json"
+            className="file-input file-input-sm file-input-bordered w-full"
+          />
+          <div className="flex gap-2 mt-2">
+            <button
+              className="btn btn-sm btn-outline"
+              onClick={() => handleImport('merge')}
+            >
+              Import (Merge)
+            </button>
+            <button
+              className="btn btn-sm btn-outline btn-warning"
+              onClick={() => handleImport('replace')}
+            >
+              Import (Replace All)
+            </button>
+          </div>
+          <p className="text-xs text-base-content/40 mt-1">
+            Merge adds new tasks and updates existing. Replace overwrites everything.
+          </p>
         </div>
       </div>
     </div>

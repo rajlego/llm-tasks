@@ -38,8 +38,8 @@ interface SettingsState {
 export const useSettingsStore = create<SettingsState>()(
   persist(
     (set, get) => ({
-      openRouterApiKey: '',
-      openAIApiKey: '',
+      openRouterApiKey: import.meta.env.VITE_OPENROUTER_API_KEY || '',
+      openAIApiKey: import.meta.env.VITE_OPENAI_API_KEY || '',
       defaultModelId: 'anthropic/claude-sonnet-4',
       defaultTemperature: 0.7,
       defaultMaxTokens: 4096,

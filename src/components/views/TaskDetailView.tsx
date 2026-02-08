@@ -7,7 +7,7 @@ import { TaskStatusBadge } from '../task/TaskStatusBadge';
 import { ConversationThread } from '../execution/ConversationThread';
 import { HumanInputForm } from '../execution/HumanInputForm';
 import { StreamingMessage } from '../execution/StreamingMessage';
-import { getModelInfo } from '../../models/agent';
+import { MODEL_REGISTRY } from '../../models/agent';
 import { STATUS_LABELS, VALID_TRANSITIONS, type TaskStatus } from '../../models/task';
 import { formatRelativeTime, formatCost } from '../../utils/date';
 import { executeTask, cancelExecution } from '../../services/llm/executor';
@@ -37,7 +37,6 @@ export function TaskDetailView() {
 
   if (!detailPanelOpen || !task) return null;
 
-  const model = getModelInfo(task.executionConfig.modelId);
   const validTransitions = VALID_TRANSITIONS[task.status];
 
   const startEditing = () => {
@@ -107,14 +106,50 @@ export function TaskDetailView() {
           </div>
         )}
 
-        {/* Metadata */}
-        <div className="grid grid-cols-2 gap-2 text-xs text-base-content/60">
-          <div>Model: {model?.name || task.executionConfig.modelId}</div>
-          <div>Strategy: {task.executionConfig.researchStrategy}</div>
-          <div>Created: {formatRelativeTime(task.createdAt)}</div>
-          <div>Cost: {formatCost(task.tokenUsage.totalCost)}</div>
-          <div>Steps: {task.executionSteps}</div>
-          <div>Priority: {task.priority}</div>
+        {/* Config (editable when queued) */}
+        <div className="space-y-2">
+          <div className="grid grid-cols-2 gap-2">
+            <label className="form-control">
+              <span className="label-text text-xs">Model</span>
+              <select
+                className="select select-xs select-bordered"
+                value={task.executionConfig.modelId}
+                onChange={e => updateTask(task.id, {
+                  executionConfig: { ...task.executionConfig, modelId: e.target.value },
+                })}
+                disabled={task.status !== 'queued'}
+              >
+                {MODEL_REGISTRY.map(m => (
+                  <option key={m.id} value={m.id}>{m.name}</option>
+                ))}
+              </select>
+            </label>
+            <label className="form-control">
+              <span className="label-text text-xs">Strategy</span>
+              <select
+                className="select select-xs select-bordered"
+                value={task.executionConfig.researchStrategy}
+                onChange={e => updateTask(task.id, {
+                  executionConfig: {
+                    ...task.executionConfig,
+                    researchStrategy: e.target.value as import('../../models/task').ResearchStrategy,
+                  },
+                })}
+                disabled={task.status !== 'queued'}
+              >
+                <option value="standard">Standard</option>
+                <option value="perplexity">Perplexity Research</option>
+                <option value="openai_deep">OpenAI Deep Research</option>
+                <option value="multi_model">Multi-Model Pipeline</option>
+              </select>
+            </label>
+          </div>
+
+          <div className="grid grid-cols-3 gap-2 text-xs text-base-content/60">
+            <div>Created: {formatRelativeTime(task.createdAt)}</div>
+            <div>Cost: {formatCost(task.tokenUsage.totalCost)}</div>
+            <div>Steps: {task.executionSteps}</div>
+          </div>
         </div>
 
         {/* Actions */}
