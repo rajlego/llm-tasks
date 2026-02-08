@@ -1,8 +1,8 @@
 import { create } from 'zustand';
 
 interface ExecutionState {
-  // Active executions: taskId -> true (AbortControllers stored in executor service)
-  activeTaskIds: Set<string>;
+  // Active executions: taskId -> true
+  activeTaskIds: Record<string, boolean>;
 
   // Streaming content per task
   streamingContent: Record<string, string>;
@@ -21,28 +21,25 @@ interface ExecutionState {
 }
 
 export const useExecutionStore = create<ExecutionState>()((set, get) => ({
-  activeTaskIds: new Set(),
+  activeTaskIds: {},
   streamingContent: {},
 
   markActive: (taskId) => {
-    set(state => {
-      const next = new Set(state.activeTaskIds);
-      next.add(taskId);
-      return { activeTaskIds: next };
-    });
+    set(state => ({
+      activeTaskIds: { ...state.activeTaskIds, [taskId]: true },
+    }));
   },
 
   markInactive: (taskId) => {
     set(state => {
-      const next = new Set(state.activeTaskIds);
-      next.delete(taskId);
-      return { activeTaskIds: next };
+      const { [taskId]: _, ...rest } = state.activeTaskIds;
+      return { activeTaskIds: rest };
     });
   },
 
-  isExecuting: (taskId) => get().activeTaskIds.has(taskId),
+  isExecuting: (taskId) => Boolean(get().activeTaskIds[taskId]),
 
-  getActiveCount: () => get().activeTaskIds.size,
+  getActiveCount: () => Object.keys(get().activeTaskIds).length,
 
   updateStreamingContent: (taskId, content) => {
     set(state => ({

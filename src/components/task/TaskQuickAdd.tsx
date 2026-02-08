@@ -15,7 +15,7 @@ export function TaskQuickAdd() {
   const addTask = useTaskStore(s => s.addTask);
   const quickAddOpen = useUIStore(s => s.quickAddOpen);
   const setQuickAddOpen = useUIStore(s => s.setQuickAddOpen);
-  const hasApiKey = useSettingsStore(s => s.hasApiKey());
+  const hasApiKey = useSettingsStore(s => s.openRouterApiKey.length > 0);
 
   useEffect(() => {
     if (quickAddOpen && inputRef.current) {

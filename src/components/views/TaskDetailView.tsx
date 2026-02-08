@@ -159,7 +159,7 @@ export function TaskDetailView() {
             <button
               className="btn btn-xs btn-info"
               onClick={() => {
-                if (!useSettingsStore.getState().hasApiKey()) {
+                if (!useSettingsStore.getState().openRouterApiKey) {
                   useUIStore.getState().setView('settings');
                   return;
                 }

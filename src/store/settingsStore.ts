@@ -32,12 +32,11 @@ interface SettingsState {
   setMonthlyBudget: (budget: number) => void;
   addToSpent: (amount: number) => void;
   resetSpent: () => void;
-  hasApiKey: () => boolean;
 }
 
 export const useSettingsStore = create<SettingsState>()(
   persist(
-    (set, get) => ({
+    (set) => ({
       openRouterApiKey: import.meta.env.VITE_OPENROUTER_API_KEY || '',
       openAIApiKey: import.meta.env.VITE_OPENAI_API_KEY || '',
       defaultModelId: 'anthropic/claude-sonnet-4',
@@ -58,7 +57,6 @@ export const useSettingsStore = create<SettingsState>()(
       setMonthlyBudget: (budget) => set({ monthlyBudget: budget }),
       addToSpent: (amount) => set(s => ({ totalSpent: s.totalSpent + amount })),
       resetSpent: () => set({ totalSpent: 0 }),
-      hasApiKey: () => get().openRouterApiKey.length > 0,
     }),
     {
       name: 'llm-tasks-settings',

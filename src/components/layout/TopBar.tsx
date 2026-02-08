@@ -12,7 +12,7 @@ export function TopBar() {
   const quickAddOpen = useUIStore(s => s.quickAddOpen);
   const setQuickAddOpen = useUIStore(s => s.setQuickAddOpen);
   const totalSpent = useSettingsStore(s => s.totalSpent);
-  const hasApiKey = useSettingsStore(s => s.hasApiKey());
+  const hasApiKey = useSettingsStore(s => s.openRouterApiKey.length > 0);
   const queuedTasks = useTaskStore(s => s.tasks.filter(t => t.status === 'queued'));
   const activeCount = useExecutionStore(s => s.getActiveCount());
 
